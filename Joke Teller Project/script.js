@@ -2,27 +2,22 @@
 // https://rapidapi.com/voicerss/api/text-to-speech-1/
 // https://www.voicerss.org/personel/
 
-
-
 const button = document.getElementById('button');
 const audioElement = document.getElementById('audio');
-const programmingButton = document.getElementById('programming');
-const darkButton = document.getElementById('dark');
-const nsfwButton = document.getElementById('nsfw');
 
-let currentAPIUrl =
-  'https://sv443.net/jokeapi/v2/joke/Programming,Dark?blacklistFlags=nsfw,religious,political,racist,sexist';
-
-// Disable / Enable button
+// Disable/Enable Button
 function toggleButton() {
   button.disabled = !button.disabled;
 }
 
-// Pass the joke to the voiceRSS API
+// VoiceRSS Speech Function
 function tellMe(joke) {
+  const jokeString = joke.trim().replace(/ /g, '%20');
+  // VoiceRSS Speech Parameters
   VoiceRSS.speech({
-    key: '<c419214701ce4a9ea7aa5d7abd1b6700>',
-    src: 'Hello world',
+    // Normally, don't write out API Keys like this, but an exception made here because it's free.
+    key: 'c419214701ce4a9ea7aa5d7abd1b6700',
+    src: jokeString,
     hl: 'en-us',
     r: 0,
     c: 'mp3',
@@ -31,55 +26,28 @@ function tellMe(joke) {
   });
 }
 
-// Get Jokes from Joke API
+// Get jokes from Joke API
 async function getJokes() {
   let joke = '';
-
+  const apiUrl = 'https://sv443.net/jokeapi/v2/joke/Programming?blacklistFlags=nsfw,racist,sexist';
   try {
-    const response = await fetch(currentAPIUrl);
+    const response = await fetch(apiUrl);
     const data = await response.json();
-
+    // Assign One or Two Part Joke
     if (data.setup) {
       joke = `${data.setup} ... ${data.delivery}`;
     } else {
       joke = data.joke;
     }
-
-    // Tell the joke
+    // Passing Joke to VoiceRSS API
     tellMe(joke);
-
-    // Disable the button
+    // Disable Button
     toggleButton();
   } catch (error) {
-    console.log('An error occured in getJokes(). ', error);
+    // Catch Error Here
   }
 }
 
 // Event Listeners
-button.addEventListener('click', () => {
-  getJokes();
-});
+button.addEventListener('click', getJokes);
 audioElement.addEventListener('ended', toggleButton);
-
-// These are to let the user switch between different joke types.
-programmingButton.addEventListener('click', () => {
-  darkButton.disabled = false;
-  nsfwButton.disabled = false;
-  programmingButton.disabled = true;
-  currentAPIUrl =
-    'https://sv443.net/jokeapi/v2/joke/Programming,Dark?blacklistFlags=nsfw,religious,political,racist,sexist';
-});
-darkButton.addEventListener('click', () => {
-  darkButton.disabled = true;
-  nsfwButton.disabled = false;
-  programmingButton.disabled = false;
-  currentAPIUrl =
-    'https://sv443.net/jokeapi/v2/joke/Dark?blacklistFlags=nsfw,religious,political,racist,sexist';
-});
-nsfwButton.addEventListener('click', () => {
-  darkButton.disabled = false;
-  nsfwButton.disabled = true;
-  programmingButton.disabled = false;
-  currentAPIUrl =
-    'https://sv443.net/jokeapi/v2/joke/Any?blacklistFlags=religious,political,racist,sexist';
-});
